@@ -20,8 +20,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # todo My Apps
-    'users'
+    'users',
     # todo Third Party packages
+    'rest_framework',
+    'drf_spectacular',
 
 ]
 
@@ -54,6 +56,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'root.wsgi.application'
+AUTH_USER_MODEL = 'users.User'
 
 DATABASES = {
     'default': {
@@ -88,3 +91,5 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+from root.drf_settings import *
