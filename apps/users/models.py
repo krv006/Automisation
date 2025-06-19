@@ -10,17 +10,13 @@ class User(AbstractUser):
         ('admin', 'Admin'),
         ('manager', 'Manager'),
         ('warehouseman', 'Warehouseman'),
+        ('user', 'User'),
     ]
-    role = CharField(max_length=20, choices=ROLE_CHOICES, default='student')
-
+    role = CharField(max_length=20, choices=ROLE_CHOICES, default='user')
     first_name = CharField(max_length=150, blank=True)
     last_name = CharField(max_length=150, blank=True)
-
     email = EmailField(unique=True)
     is_active = BooleanField(default=False)
-
-    # todo Talaba haqida qo‘shimcha ma'lumotlar
-    date_of_birth = DateField(null=True, blank=True)
     phone_number = CharField(max_length=15, blank=True, null=True)
     date_joined = DateTimeField(default=timezone.now)
 
