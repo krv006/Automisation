@@ -6,6 +6,7 @@ from rest_framework.serializers import ModelSerializer, Serializer
 
 from users.gen_code import generate_code
 from users.models import User
+from users.task import send_verification_email
 
 
 class UserModelSerializer(ModelSerializer):

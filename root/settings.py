@@ -24,6 +24,8 @@ INSTALLED_APPS = [
     # todo Third Party packages
     'rest_framework',
     'drf_spectacular',
+    'django_celery_results',
+    'rest_framework_simplejwt',
 
 ]
 
@@ -88,8 +90,36 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
+MEDIA_URL = "media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'rvkamronbek@gmail.com'
+EMAIL_HOST_PASSWORD = 'lsjw bobj kams uzam'
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
+CELERY_TIMEZONE = "Asia/Tashkent"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# todo DRF settings
 from root.drf_settings import *
+from root.jwt_settings import *
