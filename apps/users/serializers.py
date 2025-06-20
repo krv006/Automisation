@@ -1,7 +1,7 @@
 import random
 import string
 
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
 from rest_framework.exceptions import ValidationError
@@ -119,33 +119,25 @@ class ManagerCreateUserSerializer(ModelSerializer):
         user.save()
         return user
 
-
-User = get_user_model()
-
-class CustomPhoneOrEmailLoginSerializer(Serializer):
-    username = CharField()
-    password = CharField(write_only=True)
-
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
-        identifier = attrs.get('username')
-        password = attrs.get('password')
+        email = attrs.get("email")
+        password = attrs.get("password")
 
-        if not identifier or not password:
-            raise ValidationError("Foydalanuvchi yoki parol kiritilmadi.")
+        if not email or not password:
+            raise ValidationError("Email va parol to‘ldirilishi shart.")
 
         try:
-            if '@' in identifier:
-                user = User.objects.get(email=identifier)
-            else:
-                user = User.objects.get(phone_number=identifier)
+            user = User.objects.get(email=email)
         except User.DoesNotExist:
-            raise ValidationError("Bunday foydalanuvchi mavjud emas.")
+            raise ValidationError("Login yoki parol noto‘g‘ri.")
 
         if not user.check_password(password):
-            raise ValidationError("Parol noto‘g‘ri.")
+            raise ValidationError("Login yoki parol noto‘g‘ri.")
 
         if not user.is_active:
-            raise ValidationError("Foydalanuvchi aktiv emas.")
+            raise ValidationError("Foydalanuvchi aktivlashtirilmagan.")
+
         refresh = RefreshToken.for_user(user)
 
         return {
@@ -153,8 +145,86 @@ class CustomPhoneOrEmailLoginSerializer(Serializer):
             "access": str(refresh.access_token),
             "user": {
                 "id": user.id,
+                "role": user.role,
                 "email": user.email,
-                "phone_number": user.phone_number,
-                "role": user.role
+                "phone_number": user.phone_number
             }
         }
+
+# class CustomPhoneOrEmailLoginSerializer(Serializer):
+#     phone_number = CharField()
+#     password = CharField(write_only=True)
+#
+#     def validate(self, attrs):
+#         phone_number = attrs.get('phone_number')
+#         password = attrs.get('password')
+#
+#         if not phone_number or not password:
+#             raise ValidationError("Telefon raqam va parol to‘ldirilishi shart.")
+#
+#         try:
+#             user = User.objects.get(phone_number=phone_number)
+#         except User.DoesNotExist:
+#             raise ValidationError("Bunday telefon raqamli foydalanuvchi topilmadi.")
+#
+#         if not user.check_password(password):
+#             raise ValidationError("Parol noto‘g‘ri.")
+#
+#         if not user.is_active:
+#             user.is_active = True
+#             user.save(update_fields=['is_active'])
+#
+#         refresh = RefreshToken.for_user(user)
+#
+#         return {
+#             'refresh': str(refresh),
+#             'access': str(refresh.access_token),
+#             'user': {
+#                 'id': user.id,
+#                 'first_name': user.first_name,
+#                 'last_name': user.last_name,
+#                 'email': user.email,
+#                 'phone_number': user.phone_number,
+#                 'role': user.role
+#             }
+#         }
+
+# User = get_user_model()
+#
+#
+# class CustomPhoneOrEmailLoginSerializer(Serializer):
+#     username = CharField()
+#     password = CharField(write_only=True)
+#
+#     def validate(self, attrs):
+#         identifier = attrs.get('username')
+#         password = attrs.get('password')
+#
+#         if not identifier or not password:
+#             raise ValidationError("Foydalanuvchi yoki parol kiritilmadi.")
+#
+#         try:
+#             if '@' in identifier:
+#                 user = User.objects.get(email=identifier)
+#             else:
+#                 user = User.objects.get(phone_number=identifier)
+#         except User.DoesNotExist:
+#             raise ValidationError("Bunday foydalanuvchi mavjud emas.")
+#
+#         if not user.check_password(password):
+#             raise ValidationError("Parol noto‘g‘ri.")
+#
+#         if not user.is_active:
+#             raise ValidationError("Foydalanuvchi aktiv emas.")
+#         refresh = RefreshToken.for_user(user)
+#
+#         return {
+#             "refresh": str(refresh),
+#             "access": str(refresh.access_token),
+#             "user": {
+#                 "id": user.id,
+#                 "email": user.email,
+#                 "phone_number": user.phone_number,
+#                 "role": user.role
+#             }
+#         }

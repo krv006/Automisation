@@ -6,10 +6,12 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.models import User
 from users.serializers import UserModelSerializer, RegisterUserModelSerializer, LoginUserModelSerializer, \
-    VerifyCodeSerializer, ManagerCreateUserSerializer, CustomPhoneOrEmailLoginSerializer
+    VerifyCodeSerializer, ManagerCreateUserSerializer, \
+    CustomTokenObtainPairSerializer
 
 
 @extend_schema(tags=['Auth'], description="""
@@ -73,9 +75,14 @@ class ManagerCreateUserView(CreateAPIView):
 
 
 @extend_schema(tags=["manager-login"])
-class ManagerLoginView(APIView):
+class PhoneLoginAPIView(APIView):
     def post(self, request):
         serializer = CustomPhoneOrEmailLoginSerializer(data=request.data)
         if serializer.is_valid():
-            return Response(serializer.validated_data, status=200)
-        return Response(serializer.errors, status=400)
+            return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema(tags=["manager-login"])
+class ManagerLoginView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
