@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # todo My Apps
     'users',
+    'shared',
     # todo Third Party packages
     'rest_framework',
     'drf_spectacular',

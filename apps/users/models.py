@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import CharField, EmailField, BooleanField, Model, DateTimeField, CASCADE, ForeignKey
 from django.utils import timezone
 
+from shared.model import TimeBaseModel
 from users.managers import CustomUserManager
 
 
@@ -33,12 +34,8 @@ class User(AbstractUser):
         return f'{self.first_name} {self.last_name}'
 
 
-class Manager(Model):
+class Manager(TimeBaseModel):
     user = ForeignKey('users.User', CASCADE, related_name='manager_profile')
-
-    # todo shared model yozish kere
-    # created_at = models.DateTimeField(auto_now_add=True)
-    # updated_at = models.DateTimeField(auto_now=True)
 
     def clean(self):
         if self.user.role != 'manager':
