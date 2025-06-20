@@ -18,7 +18,7 @@ class User(AbstractUser):
     last_name = CharField(max_length=150, blank=True)
     email = EmailField(unique=True)
     is_active = BooleanField(default=False)
-    phone_number = CharField(max_length=15, unique=True, blank=True, null=True)
+    phone_number = CharField(max_length=15, unique=True)
     date_joined = DateTimeField(default=timezone.now)
 
     USERNAME_FIELD = 'email'

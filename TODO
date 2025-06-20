@@ -1,0 +1,21 @@
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUwNTAxNjkwLCJpYXQiOjE3NTA0MTUyOTAsImp0aSI6IjJiODY5ZDYzMDMwYTQ5ODU5OWM4ZGIzZjcxYWE2Mjk4IiwidXNlcl9pZCI6Mn0.ZnFElKBG8ajAOigFFjLKn7OL8MuNScAX9pZkJQ9SQGE
+
+curl -X POST http://localhost:8000/api/v1/users/manager/create-user/ \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUwNDE0OTgzLCJpYXQiOjE3NTA0MTQ2ODMsImp0aSI6ImM5MDY4MmM1NmVlMDRlMmViZGVmNDllM2NkZTM0YzM3IiwidXNlcl9pZCI6Mn0.CIuHF8UQaHF4lFq2_Yy0KHwx43kVEUyb-nH5dYg0QNo" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "first_name": "Ali",
+        "last_name": "Valiyev",
+        "email": "ali@gmail.com",
+        "phone_number": "+9989011223344"
+      }'
+
+
+{
+  "first_name": "string",
+  "last_name": "string",
+  "email": "1@example.com",
+  "phone_number": "12",
+  "password": "1"
+}

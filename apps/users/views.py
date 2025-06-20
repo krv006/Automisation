@@ -6,11 +6,10 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.models import User
 from users.serializers import UserModelSerializer, RegisterUserModelSerializer, LoginUserModelSerializer, \
-    VerifyCodeSerializer, ManagerCreateUserSerializer, CustomTokenObtainPairSerializer
+    VerifyCodeSerializer, ManagerCreateUserSerializer, CustomPhoneOrEmailLoginSerializer
 
 
 @extend_schema(tags=['Auth'], description="""
@@ -62,20 +61,21 @@ class UserListAPIView(ListAPIView):
 
 
 @extend_schema(tags=["manager-login"])
-class ManagerCreateUserView(APIView):
+class ManagerCreateUserView(CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = ManagerCreateUserSerializer
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
+    def create(self, request, *args, **kwargs):
         if request.user.role != 'manager':
             return Response({"detail": "Faqat managerlar user yaratishi mumkin."}, status=403)
-
-        serializer = ManagerCreateUserSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+        return super().create(request, *args, **kwargs)
 
 
 @extend_schema(tags=["manager-login"])
-class ManagerLoginView(TokenObtainPairView):
-    serializer_class = CustomTokenObtainPairSerializer
+class ManagerLoginView(APIView):
+    def post(self, request):
+        serializer = CustomPhoneOrEmailLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            return Response(serializer.validated_data, status=200)
+        return Response(serializer.errors, status=400)

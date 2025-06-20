@@ -13,5 +13,5 @@ urlpatterns = [
 
     # todo Manager-login
     path('manager/create-user/', ManagerCreateUserView.as_view(), name='manager-create-user'),
-    path('login/', ManagerLoginView.as_view(), name='manager-login'),
+    path('manager/login/', ManagerLoginView.as_view(), name='manager-login'),
 ]

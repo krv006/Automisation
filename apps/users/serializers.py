@@ -1,13 +1,14 @@
 import random
 import string
 
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import CharField, EmailField
 from rest_framework.serializers import ModelSerializer, Serializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.gen_code import generate_code
 from users.models import User
@@ -90,51 +91,70 @@ class VerifyCodeSerializer(Serializer):
 
 
 class ManagerCreateUserSerializer(ModelSerializer):
-    password = CharField(read_only=True)
+    password = CharField(write_only=True)
 
     class Meta:
         model = User
         fields = ('role', 'first_name', 'last_name', 'email', 'phone_number', 'password')
         extra_kwargs = {
             'role': {'read_only': True},
-            'phone_number': {'required': True},  # majburiy qilib qo‘yamiz
+            'email': {'required': True},
+            'phone_number': {'required': True},
+            'password': {'required': True}
         }
 
     def create(self, validated_data):
         validated_data['role'] = 'user'
-
-        password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
-
+        password = validated_data.pop('password')
+        username = 'user_' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
         user = User.objects.create_user(
+            username=username,
+            email=validated_data.get('email'),
+            phone_number=validated_data.get('phone_number'),
             first_name=validated_data.get('first_name'),
             last_name=validated_data.get('last_name'),
-            email=validated_data.get('email', None),
-            phone_number=validated_data.get('phone_number'),
             password=password
         )
         user.is_active = True
         user.save()
-
-        user._generated_password = password
         return user
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data['password'] = getattr(instance, '_generated_password', None)
-        return data
 
+User = get_user_model()
 
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+class CustomPhoneOrEmailLoginSerializer(Serializer):
+    username = CharField()
+    password = CharField(write_only=True)
+
     def validate(self, attrs):
-        username = attrs.get("username")
-        password = attrs.get("password")
+        identifier = attrs.get('username')
+        password = attrs.get('password')
 
-        user = authenticate(username=username, password=password)
-        if not user:
-            raise ValidationError("Login yoki parol noto‘g‘ri.")
+        if not identifier or not password:
+            raise ValidationError("Foydalanuvchi yoki parol kiritilmadi.")
 
-        data = super().validate(attrs)
-        data['role'] = user.role
-        data['email'] = user.email
-        data['phone_number'] = user.phone_number
-        return data
+        try:
+            if '@' in identifier:
+                user = User.objects.get(email=identifier)
+            else:
+                user = User.objects.get(phone_number=identifier)
+        except User.DoesNotExist:
+            raise ValidationError("Bunday foydalanuvchi mavjud emas.")
+
+        if not user.check_password(password):
+            raise ValidationError("Parol noto‘g‘ri.")
+
+        if not user.is_active:
+            raise ValidationError("Foydalanuvchi aktiv emas.")
+        refresh = RefreshToken.for_user(user)
+
+        return {
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "phone_number": user.phone_number,
+                "role": user.role
+            }
+        }
