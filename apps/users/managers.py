@@ -6,15 +6,15 @@ class CustomUserManager(UserManager):
 
     def _create_user(self, email, password, **extra_fields):
         """
-        Create and save a user with the given username, email, and password.
+        Create and save a user with the given email and password.
         """
         if not email:
             raise ValueError("The given email must be set")
-        email = self.normalize_email(email)
-        # Lookup the real model class from the global app registry so this
-        # manager method can be used in migrations. This is fine because
-        # managers are by definition working on the real model.
 
+        if not extra_fields.get("phone_number"):
+            raise ValueError("Phone number is required")
+
+        email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.password = make_password(password)
         user.save(using=self._db)

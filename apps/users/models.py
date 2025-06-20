@@ -1,6 +1,5 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
-from django.db.models import CharField, EmailField, BooleanField, Model, DateTimeField, CASCADE, ForeignKey
+from django.db.models import CharField, EmailField, BooleanField, Model, DateTimeField
 from django.utils import timezone
 
 from shared.model import TimeBaseModel
@@ -19,7 +18,7 @@ class User(AbstractUser):
     last_name = CharField(max_length=150, blank=True)
     email = EmailField(unique=True)
     is_active = BooleanField(default=False)
-    phone_number = CharField(max_length=15, blank=True, null=True)
+    phone_number = CharField(max_length=15, unique=True, blank=True, null=True)
     date_joined = DateTimeField(default=timezone.now)
 
     USERNAME_FIELD = 'email'
@@ -33,17 +32,16 @@ class User(AbstractUser):
     def full_name(self):
         return f'{self.first_name} {self.last_name}'
 
-
-class Manager(TimeBaseModel):
-    user = ForeignKey('users.User', CASCADE, related_name='manager_profile')
-
-    def clean(self):
-        if self.user.role != 'manager':
-            raise ValidationError("Faqatgina 'manager' roliga ega foydalanuvchi Manager bo'lishi mumkin.")
-
-    def save(self, *args, **kwargs):
-        self.clean()
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"Manager: {self.user.full_name()} ({self.user.email})"
+# class Manager(TimeBaseModel):
+#     user = ForeignKey('users.User', CASCADE, related_name='manager_profile')
+#
+#     def clean(self):
+#         if self.user.role != 'manager':
+#             raise ValidationError("Faqatgina 'manager' roliga ega foydalanuvchi Manager bo'lishi mumkin.")
+#
+#     def save(self, *args, **kwargs):
+#         self.clean()
+#         super().save(*args, **kwargs)
+#
+#     def __str__(self):
+#         return f"Manager: {self.user.full_name()} ({self.user.email})"
