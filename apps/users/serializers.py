@@ -1,7 +1,6 @@
 import random
 import string
 
-from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
 from rest_framework.exceptions import ValidationError
@@ -119,6 +118,7 @@ class ManagerCreateUserSerializer(ModelSerializer):
         user.save()
         return user
 
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         email = attrs.get("email")
@@ -144,6 +144,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             "refresh": str(refresh),
             "access": str(refresh.access_token),
             "user": {
+                # "manager_id": user.id, todo yaratgan manager qila olishi kere buni
                 "id": user.id,
                 "role": user.role,
                 "email": user.email,
