@@ -22,7 +22,7 @@ class User(AbstractUser):
     date_joined = DateTimeField(default=timezone.now)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = ['username', 'phone_number']
 
     objects = CustomUserManager()
 
