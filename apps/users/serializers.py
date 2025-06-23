@@ -10,7 +10,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.gen_code import generate_code
-from users.models import User
+from users.models import User, UserType
 from users.task import send_verification_email
 
 
@@ -91,20 +91,26 @@ class VerifyCodeSerializer(Serializer):
 
 class ManagerCreateUserSerializer(ModelSerializer):
     password = CharField(write_only=True)
+    user_type = CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ('role', 'first_name', 'last_name', 'email', 'phone_number', 'password')
+        fields = ('role', 'first_name', 'last_name', 'email', 'phone_number', 'password', 'user_type')
         extra_kwargs = {
             'role': {'read_only': True},
             'email': {'required': True},
             'phone_number': {'required': True},
-            'password': {'required': True}
+            'password': {'required': True},
+            'user_type': {'required': True}
         }
 
     def create(self, validated_data):
         validated_data['role'] = 'user'
         password = validated_data.pop('password')
+        user_type_name = validated_data.pop('user_type')
+
+        user_type_obj, _ = UserType.objects.get_or_create(name=user_type_name)
+
         username = 'user_' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
         user = User.objects.create_user(
             username=username,
@@ -114,10 +120,10 @@ class ManagerCreateUserSerializer(ModelSerializer):
             last_name=validated_data.get('last_name'),
             password=password
         )
+        user.user_type = user_type_obj
         user.is_active = True
         user.save()
         return user
-
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
@@ -144,11 +150,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             "refresh": str(refresh),
             "access": str(refresh.access_token),
             "user": {
-                # "manager_id": user.id, todo yaratgan manager qila olishi kere buni
                 "id": user.id,
                 "role": user.role,
                 "email": user.email,
-                "phone_number": user.phone_number
+                "phone_number": user.phone_number,
+                "user_type": user.user_type.name if user.user_type else None
             }
         }
 

@@ -20,3 +20,31 @@ http://localhost:8000/api/v1/users/manager/login1/
 }
 
 mana shunga phone_number di qoshish kerak boladi
+
+
+
+
+
+{
+  "email": "rustamovkamron0204@gmail.com",
+  "phone_number": "901078055",
+  "first_name": "Kamron",
+  "last_name": "Rustamov",
+  "password": "string",
+  "confirm_password": "string"
+}
+
+
+
+{
+  "first_name": "Kamronbek",
+  "last_name": "Rustamov",
+  "email": "user@gmail.com",
+  "phone_number": "12345",
+  "password": "string",
+  "user_type": "string"
+}
+
+
+USER TYPE di togirlash kerak
+
