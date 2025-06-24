@@ -37,12 +37,12 @@ mana shunga phone_number di qoshish kerak boladi
 
 
 {
-  "first_name": "Kamronbek",
-  "last_name": "Rustamov",
-  "email": "user@gmail.com",
-  "phone_number": "12345",
+  "first_name": "TEST",
+  "last_name": "TEST",
+  "email": "user21@example.com",
+  "phone_number": "34",
   "password": "string",
-  "user_type": "string"
+  "user_type": "Arrachi"
 }
 
 

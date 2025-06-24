@@ -10,7 +10,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.gen_code import generate_code
-from users.models import User, UserType
+from users.models import User
 from users.task import send_verification_email
 
 
@@ -91,7 +91,6 @@ class VerifyCodeSerializer(Serializer):
 
 class ManagerCreateUserSerializer(ModelSerializer):
     password = CharField(write_only=True)
-    user_type = CharField(write_only=True)
 
     class Meta:
         model = User
@@ -101,40 +100,39 @@ class ManagerCreateUserSerializer(ModelSerializer):
             'email': {'required': True},
             'phone_number': {'required': True},
             'password': {'required': True},
-            'user_type': {'required': True}
+            'user_type': {'required': False}
         }
 
     def create(self, validated_data):
         validated_data['role'] = 'user'
         password = validated_data.pop('password')
-        user_type_name = validated_data.pop('user_type')
-
-        user_type_obj, _ = UserType.objects.get_or_create(name=user_type_name)
 
         username = 'user_' + ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+
         user = User.objects.create_user(
             username=username,
             email=validated_data.get('email'),
             phone_number=validated_data.get('phone_number'),
             first_name=validated_data.get('first_name'),
             last_name=validated_data.get('last_name'),
-            password=password
+            password=password,
+            user_type=validated_data.get('user_type')  # ✅ Bazaga yoziladi
         )
-        user.user_type = user_type_obj
         user.is_active = True
         user.save()
         return user
 
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
-        email = attrs.get("email")
+        phone_number = attrs.get("phone_number")
         password = attrs.get("password")
 
-        if not email or not password:
-            raise ValidationError("Email va parol to‘ldirilishi shart.")
+        if not phone_number or not password:
+            raise ValidationError("Telefon raqam va parol to‘ldirilishi shart.")
 
         try:
-            user = User.objects.get(email=email)
+            user = User.objects.get(phone_number=phone_number)
         except User.DoesNotExist:
             raise ValidationError("Login yoki parol noto‘g‘ri.")
 
@@ -154,6 +152,40 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                 "role": user.role,
                 "email": user.email,
                 "phone_number": user.phone_number,
-                "user_type": user.user_type.name if user.user_type else None
+                "user_type": user.user_type or None
             }
         }
+
+class PhoneLoginSerializer(Serializer):
+    phone_number = CharField()
+    password = CharField()
+
+    def validate(self, attrs):
+        phone_number = attrs.get("phone_number")
+        password = attrs.get("password")
+
+        try:
+            user = User.objects.get(phone_number=phone_number)
+        except User.DoesNotExist:
+            raise ValidationError("Raqam yoki parol noto‘g‘ri.")
+
+        if not user.check_password(password):
+            raise ValidationError("Parol noto‘g‘ri.")
+
+        if not user.is_active:
+            raise ValidationError("Foydalanuvchi aktiv emas.")
+
+        refresh = RefreshToken.for_user(user)
+
+        return {
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "phone_number": user.phone_number,
+                "role": user.role,
+                "user_type": user.user_type
+            }
+        }
+
