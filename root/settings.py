@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # todo My Apps
     'users',
+    'project',
     'shared',
     # todo Third Party packages
     'rest_framework',
@@ -84,8 +85,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    'users.backends.EmailOrPhoneBackend',                # 🔥 1. bizning backend
-    'django.contrib.auth.backends.ModelBackend',         # 2. default
+    'users.backends.EmailOrPhoneBackend',
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 LANGUAGE_CODE = 'en-us'
