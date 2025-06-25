@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from shared.model import TimeBaseModel
 
 
-class Project(TimeBaseModel):
+class Project(Model):
     name = CharField(max_length=255)
     description = TextField(blank=True)
     created_by = ForeignKey('users.User', SET_NULL, null=True, related_name='created_projects')  # Admin
@@ -20,7 +20,7 @@ class Project(TimeBaseModel):
         return f"{self.name} (Manager: {self.manager.full_name() if self.manager else 'None'})"
 
 
-class ProjectUser(TimeBaseModel):
+class ProjectUser(Model):
     project = ForeignKey('project.Project', CASCADE, related_name='project_users')
     user = ForeignKey('users.User', CASCADE, related_name='assigned_projects')
     assigned_by = ForeignKey('users.User', SET_NULL, null=True, related_name='assigned_users')
