@@ -1,5 +1,5 @@
 from django.contrib.auth.models import AbstractUser
-from django.db.models import CharField, EmailField, BooleanField, Model, DateTimeField, SET_NULL, ForeignKey
+from django.db.models import CharField, EmailField, BooleanField, Model, DateTimeField
 from django.utils import timezone
 
 from shared.model import TimeBaseModel
@@ -32,4 +32,3 @@ class User(AbstractUser):
 
     def full_name(self):
         return f'{self.first_name} {self.last_name}'
-
