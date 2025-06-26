@@ -1,5 +1,5 @@
-from django.db.models import Model, CharField, TextField, CASCADE, SET_NULL, ForeignKey
 from django.core.exceptions import ValidationError
+from django.db.models import Model, CharField, TextField, CASCADE, SET_NULL, ForeignKey
 
 from shared.model import TimeBaseModel
 
@@ -11,10 +11,10 @@ class Project(Model):
     manager = ForeignKey('users.User', SET_NULL, null=True, related_name='managed_projects')  # Manager
 
     def clean(self):
-        if self.manager and self.manager.role != 'manager':
-            raise ValidationError("Loyihaga faqat 'manager' roli bor foydalanuvchi biriktiriladi.")
         if self.created_by and self.created_by.role != 'admin':
             raise ValidationError("Loyihani faqat 'admin' yaratishi mumkin.")
+        if self.manager and self.manager.role != 'manager':
+            raise ValidationError("Loyihaga faqat 'manager' roli bor foydalanuvchi biriktiriladi.")
 
     def __str__(self):
         return f"{self.name} (Manager: {self.manager.full_name() if self.manager else 'None'})"

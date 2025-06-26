@@ -1,10 +1,11 @@
 from django.urls import path
 
 from users.views import UserListAPIView, UserRegisterCreateView, VerifyCodeApiView, LoginAPIView, ManagerCreateUserView, \
-    ManagerLoginView, PhoneLoginAPIView
+    ManagerLoginView, PhoneLoginAPIView, UserDetailListAPIView
 
 urlpatterns = [
-    path('user', UserListAPIView.as_view(), name='user-list'),
+    path('user/', UserListAPIView.as_view(), name='user-list'),
+    path('user-detail/', UserDetailListAPIView.as_view(), name='user-detail-list'),
 
     # todo Login-Register
     path('user-register/', UserRegisterCreateView.as_view(), name='register'),

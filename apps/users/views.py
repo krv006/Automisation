@@ -11,7 +11,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from users.models import User
 from users.serializers import UserModelSerializer, RegisterUserModelSerializer, LoginUserModelSerializer, \
     VerifyCodeSerializer, ManagerCreateUserSerializer, \
-    CustomTokenObtainPairSerializer, PhoneLoginSerializer
+    CustomTokenObtainPairSerializer, PhoneLoginSerializer, UserDetailModelSerializer
 
 
 @extend_schema(tags=['Auth'], description="""
@@ -60,6 +60,11 @@ class VerifyCodeApiView(GenericAPIView):
 class UserListAPIView(ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserModelSerializer
+
+@extend_schema(tags=["users"])
+class UserDetailListAPIView(ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserDetailModelSerializer
 
 
 @extend_schema(tags=["manager-login"])

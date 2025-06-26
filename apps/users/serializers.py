@@ -20,6 +20,12 @@ class UserModelSerializer(ModelSerializer):
         fields = '__all__'
 
 
+class UserDetailModelSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = 'id', 'role', 'phone_number', 'email', 'user_type', 'full_name',
+
+
 class RegisterUserModelSerializer(ModelSerializer):
     confirm_password = CharField(write_only=True)
 
@@ -156,6 +162,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             }
         }
 
+
 class PhoneLoginSerializer(Serializer):
     phone_number = CharField()
     password = CharField()
@@ -188,4 +195,3 @@ class PhoneLoginSerializer(Serializer):
                 "user_type": user.user_type
             }
         }
-
