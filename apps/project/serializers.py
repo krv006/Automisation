@@ -27,10 +27,11 @@ class ProjectDetailModelSerializer(ModelSerializer):
 class ProjectUserModelSerializer(ModelSerializer):
     project = SerializerMethodField()
     assigned_by = SerializerMethodField()
+    user = SerializerMethodField()
 
     class Meta:
         model = ProjectUser
-        fields = ('id', 'project', 'assigned_by')
+        fields = ('id', 'project', 'assigned_by', 'user', 'progress', 'assigned_by')
 
     def get_project(self, instance):
         return ProjectDetailModelSerializer(instance.project).data
@@ -38,3 +39,8 @@ class ProjectUserModelSerializer(ModelSerializer):
     def get_assigned_by(self, instance):
         from users.serializers import UserDetailModelSerializer
         return UserDetailModelSerializer(instance.assigned_by).data
+
+    # todo buni oylab korish kerak boladi
+    # def get_user(self, instance):
+    #     from users.serializers import UserDetailModelSerializer
+    #     return UserDetailModelSerializer(instance.user).data

@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.db.models import Model, CharField, TextField, CASCADE, SET_NULL, ForeignKey
+from django.db.models import Model, CharField, TextField, CASCADE, SET_NULL, ForeignKey, SmallIntegerField
 
 from shared.model import TimeBaseModel
 
@@ -24,15 +24,20 @@ class ProjectUser(Model):
     project = ForeignKey('project.Project', CASCADE, related_name='project_users')
     user = ForeignKey('users.User', CASCADE, related_name='assigned_projects')
     assigned_by = ForeignKey('users.User', SET_NULL, null=True, related_name='assigned_users')
+    progress = SmallIntegerField(default=0)
 
     def clean(self):
         if self.user.role != 'user':
             raise ValidationError("Faqat 'user' roli bor foydalanuvchi projectga biriktiriladi.")
+
         if self.assigned_by:
             if self.assigned_by.role != 'manager':
                 raise ValidationError("User'ni projectga faqat manager biriktira oladi.")
             if self.assigned_by != self.project.manager:
                 raise ValidationError("User'ni faqat shu project manager'i biriktira oladi.")
+
+        if not (0 <= self.progress <= 100):
+            raise ValidationError("Progress 0 dan 100 gacha bo‘lishi kerak.")
 
     def __str__(self):
         return f"{self.project.name} → {self.user.full_name()}"
