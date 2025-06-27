@@ -4,7 +4,7 @@ import string
 from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import CharField, EmailField
+from rest_framework.fields import CharField, EmailField, SerializerMethodField
 from rest_framework.serializers import ModelSerializer, Serializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -21,9 +21,16 @@ class UserModelSerializer(ModelSerializer):
 
 
 class UserDetailModelSerializer(ModelSerializer):
+    assigned_projects = SerializerMethodField()
+
     class Meta:
         model = User
-        fields = 'id', 'role', 'phone_number', 'email', 'user_type', 'full_name',
+        fields = 'id', 'role', 'phone_number', 'email', 'user_type', 'assigned_projects', 'full_name',
+
+    def get_assigned_projects(self, obj):
+        from project.serializers import ProjectDetailModelSerializer
+        project_users = obj.assigned_projects.select_related('project')
+        return [ProjectDetailModelSerializer(pu.project).data for pu in project_users]
 
 
 class RegisterUserModelSerializer(ModelSerializer):
