@@ -2,7 +2,6 @@ from django.contrib.auth.models import AbstractUser
 from django.db.models import CharField, EmailField, BooleanField, Model, DateTimeField
 from django.utils import timezone
 
-from shared.model import TimeBaseModel
 from users.managers import CustomUserManager
 
 

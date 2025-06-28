@@ -1,12 +1,18 @@
 from django.core.exceptions import ValidationError
-from django.db.models import Model, CharField, TextField, CASCADE, SET_NULL, ForeignKey, SmallIntegerField
+from django.db.models import Model, CharField, TextField, CASCADE, SET_NULL, ForeignKey, SmallIntegerField, DateField
+from django.db.models import Model, DateTimeField
 
-from shared.model import TimeBaseModel
+
+class TimeBaseModel(Model):
+    created_at = DateTimeField(auto_now_add=True)
+    updated_at = DateTimeField(auto_now=True)
 
 
-class Project(Model):
+class Project(TimeBaseModel):
     name = CharField(max_length=255)
     description = TextField(blank=True)
+    start_date = DateField()
+    end_date = DateField()
     created_by = ForeignKey('users.User', SET_NULL, null=True, related_name='created_projects')  # Admin
     manager = ForeignKey('users.User', SET_NULL, null=True, related_name='managed_projects')  # Manager
 
@@ -41,3 +47,26 @@ class ProjectUser(Model):
 
     def __str__(self):
         return f"{self.project.name} → {self.user.full_name()}"
+
+
+class Category(Model):
+    name = CharField(max_length=100)
+
+
+class Product(Model):
+    category = ForeignKey('project.Category', CASCADE, related_name='products')
+    name = CharField(max_length=100)
+
+
+class WorkAssignment(Model):
+    project_user = ForeignKey('project.ProjectUser', CASCADE, related_name='assignments')
+    category = ForeignKey('project.Category', CASCADE)
+    product = ForeignKey('project.Product', CASCADE)
+    comment = TextField(blank=True)
+    assigned_at = DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('project_user', 'category', 'product')
+
+    def __str__(self):
+        return f"{self.project_user.user.full_name()} - {self.category.name}/{self.product.name}"
