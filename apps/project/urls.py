@@ -5,7 +5,7 @@ from project.views import ProjectListCreateAPIView, ProjectUserListCreateAPIView
     ProductListCreateAPIView, CategoryListCreateAPIView
 
 router = DefaultRouter()
-router.register('project-user', ProjectUserRestrictedViewSet, basename='project-user')
+router.register('project-user', ProjectUserRestrictedViewSet, basename='project-user1')
 
 urlpatterns = [
     # todo Project API
