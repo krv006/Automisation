@@ -1,7 +1,7 @@
 from rest_framework.fields import SerializerMethodField
 from rest_framework.serializers import ModelSerializer
 
-from project.models import Project, ProjectUser
+from project.models import Project, ProjectUser, Category, Product
 
 
 class ProjectModelSerializer(ModelSerializer):
@@ -44,3 +44,20 @@ class ProjectUserModelSerializer(ModelSerializer):
     # def get_user(self, instance):
     #     from users.serializers import UserDetailModelSerializer
     #     return UserDetailModelSerializer(instance.user).data
+
+
+class CategoryModelSerializer(ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ('id', 'name')
+
+
+class ProductModelSerializer(ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('id', 'name', 'category')
+
+    def to_representation(self, instance):
+        repr = super().to_representation(instance)
+        repr['category'] = CategoryModelSerializer(instance.category).data
+        return repr

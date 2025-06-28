@@ -1,14 +1,14 @@
 from drf_spectacular.utils import extend_schema
-from rest_framework.generics import ListCreateAPIView
-
-from rest_framework import viewsets, status
+from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.generics import ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from project.models import Project, ProjectUser
-from project.serializers import ProjectModelSerializer, ProjectUserModelSerializer
+from project.models import Project, ProjectUser, Product, Category
+from project.serializers import ProjectModelSerializer, ProjectUserModelSerializer, ProductModelSerializer, \
+    CategoryModelSerializer
 
 
 @extend_schema(tags=['Project Api '], description="""
@@ -21,11 +21,28 @@ class ProjectListCreateAPIView(ListCreateAPIView):
 
 
 @extend_schema(tags=['Project Api '], description="""
+Product create 
+""")
+class ProductListCreateAPIView(ListCreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductModelSerializer
+
+
+@extend_schema(tags=['Project Api '], description="""
+Category create 
+""")
+class CategoryListCreateAPIView(ListCreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategoryModelSerializer
+
+
+@extend_schema(tags=['Project Api '], description="""
 Project create 
 """)
 class ProjectUserListCreateAPIView(ListCreateAPIView):
     queryset = ProjectUser.objects.all()
     serializer_class = ProjectUserModelSerializer
+
 
 @extend_schema(tags=['Project Api '], description="""
 Project create 
