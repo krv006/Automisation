@@ -1,72 +1,31 @@
-from django.core.exceptions import ValidationError
-from django.db.models import Model, CharField, TextField, CASCADE, SET_NULL, ForeignKey, SmallIntegerField, DateField
-from django.db.models import Model, DateTimeField
-
-
-class TimeBaseModel(Model):
-    created_at = DateTimeField(auto_now_add=True)
-    updated_at = DateTimeField(auto_now=True)
-
-
-class Project(TimeBaseModel):
-    name = CharField(max_length=255)
-    description = TextField(blank=True)
-    start_date = DateField()
-    end_date = DateField()
-    created_by = ForeignKey('users.User', SET_NULL, null=True, related_name='created_projects')  # Admin
-    manager = ForeignKey('users.User', SET_NULL, null=True, related_name='managed_projects')  # Manager
-
-    def clean(self):
-        if self.created_by and self.created_by.role != 'admin':
-            raise ValidationError("Loyihani faqat 'admin' yaratishi mumkin.")
-        if self.manager and self.manager.role != 'manager':
-            raise ValidationError("Loyihaga faqat 'manager' roli bor foydalanuvchi biriktiriladi.")
-
-    def __str__(self):
-        return f"{self.name} (Manager: {self.manager.full_name() if self.manager else 'None'})"
-
-
-class ProjectUser(Model):
-    project = ForeignKey('project.Project', CASCADE, related_name='project_users')
-    user = ForeignKey('users.User', CASCADE, related_name='assigned_projects')
-    assigned_by = ForeignKey('users.User', SET_NULL, null=True, related_name='assigned_users')
-    progress = SmallIntegerField(default=0)
-
-    def clean(self):
-        if self.user.role != 'user':
-            raise ValidationError("Faqat 'user' roli bor foydalanuvchi projectga biriktiriladi.")
-
-        if self.assigned_by:
-            if self.assigned_by.role != 'manager':
-                raise ValidationError("User'ni projectga faqat manager biriktira oladi.")
-            if self.assigned_by != self.project.manager:
-                raise ValidationError("User'ni faqat shu project manager'i biriktira oladi.")
-
-        if not (0 <= self.progress <= 100):
-            raise ValidationError("Progress 0 dan 100 gacha bo‘lishi kerak.")
-
-    def __str__(self):
-        return f"{self.project.name} → {self.user.full_name()}"
+from django.db.models import CharField, ForeignKey, CASCADE, DateTimeField
+from django.db.models import Model
+from django.db.models import Model
+from django.db.models import Model
+from django.db.models import Q
 
 
 class Category(Model):
-    name = CharField(max_length=100)
+    name = CharField(max_length=120)
+
+    def __str__(self):
+        return self.name
 
 
 class Product(Model):
+    name = CharField(max_length=120)
     category = ForeignKey('project.Category', CASCADE, related_name='products')
-    name = CharField(max_length=100)
-
-
-class WorkAssignment(Model):
-    project_user = ForeignKey('project.ProjectUser', CASCADE, related_name='assignments')
-    category = ForeignKey('project.Category', CASCADE)
-    product = ForeignKey('project.Product', CASCADE)
-    comment = TextField(blank=True)
-    assigned_at = DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('project_user', 'category', 'product')
 
     def __str__(self):
-        return f"{self.project_user.user.full_name()} - {self.category.name}/{self.product.name}"
+        return f"{self.category}->{self.name}"
+
+
+class Order(Model):
+    user = ForeignKey('user.User', CASCADE, related_name='orders',
+                      limit_choices_to=lambda: Q(role='Manager') | Q(role='Admin')
+                      )
+    order_type = CharField(max_length=50)
+    created_at = DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Order {self.id} by {self.user.email}"
