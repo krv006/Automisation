@@ -5,6 +5,13 @@ from django.db.models import Model
 from django.db.models import Q
 
 
+class Client(Model):
+    full_name = CharField(max_length=100)
+    phone = CharField(max_length=20, blank=True, null=True)
+
+    def __str__(self):
+        return self.full_name
+
 class Category(Model):
     name = CharField(max_length=120)
 
@@ -29,3 +36,6 @@ class Order(Model):
 
     def __str__(self):
         return f"Order {self.id} by {self.user.email}"
+
+# TODO shu model ga qarab ishlash kerak (Rasul aka chrome)
+# https://chatgpt.com/c/6860fbea-4c94-800b-b3bb-d3d16257290b
